@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
+import toast from "react-hot-toast";
+import Loading from "../components/Loading";
+import { productImage } from "../lib/productMedia";
 import CafeLogo from "../components/CafeLogo";
 import AddProductForm from "../components/AddProductForm";
 import ProductCard from "../components/ProductCard";
@@ -24,17 +27,26 @@ export default function AdminPage({
   ];
 
   function handleEdit(product) {
-    setEditingProduct(product);
+    setEditingProduct({ ...product, image: productImage(product) });
 
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
     });
   }
 
   async function handleSaveEdit(updatedProduct) {
     await onUpdateProduct(updatedProduct);
     setEditingProduct(null);
+  }
+
+  function handleDelete(id) {
+    try {
+      if (onDeleteProduct(id) && editingProduct?.id === id) setEditingProduct(null);
+    } catch { /* The parent reports save errors with a toast. */ }
+  }
+  function handleToggle(id) {
+    try { onToggleAvailability(id); } catch { /* Save error reported by parent. */ }
   }
 
   async function handleLogout() {
@@ -49,6 +61,7 @@ export default function AdminPage({
         return;
       }
 
+      toast.success("از حساب خارج شدید.");
       navigate("/login", { replace: true });
     } catch {
       setLogoutError("ارتباط برقرار نشد؛ دوباره امتحان کن.");
@@ -76,7 +89,7 @@ export default function AdminPage({
             className="btn btn-outline"
           >
             {logoutLoading
-              ? "در حال خروج..."
+              ? <Loading inline label="در حال خروج..." />
               : "خروج از حساب"}
           </button>
         </header>
@@ -116,13 +129,13 @@ export default function AdminPage({
                   description={product.description}
                   price={product.price}
                   isAvailable={product.isAvailable}
-                  image={product.image}
+                  image={productImage(product)}
                   onEdit={() => handleEdit(product)}
                   onDelete={() =>
-                    onDeleteProduct(product.id)
+                    handleDelete(product.id)
                   }
                   onToggleAvailability={() =>
-                    onToggleAvailability(product.id)
+                    handleToggle(product.id)
                   }
                 />
               ))}

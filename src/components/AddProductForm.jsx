@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Loading from "./Loading";
 import { optimizeProductImage } from "../lib/optimizeProductImage";
 
 function normalizeCategory(value) {
@@ -143,7 +144,7 @@ export default function AddProductForm({
     );
 
     const product = {
-      ...(productToEdit ?? {}),
+      ...productToEdit,
       id: isEditing
         ? productToEdit.id
         : crypto.randomUUID(),
@@ -286,9 +287,7 @@ export default function AddProductForm({
       </label>
 
       {imageLoading && (
-        <p role="status" className="hint">
-          در حال خواندن عکس...
-        </p>
+        <Loading inline label="در حال آماده‌سازی عکس..." />
       )}
 
       {image && (
@@ -296,6 +295,7 @@ export default function AddProductForm({
           src={image}
           alt="پیش‌نمایش عکس محصول"
           className="image-preview"
+          decoding="async"
         />
       )}
 
@@ -311,9 +311,9 @@ export default function AddProductForm({
         className="btn btn-primary"
       >
         {imageLoading
-          ? "در حال خواندن عکس..."
+          ? <Loading inline label="در حال آماده‌سازی عکس..." />
           : submitting
-            ? "در حال ذخیره..."
+            ? <Loading inline label="در حال ذخیره..." />
             : isEditing
               ? "ذخیره تغییرات"
               : "افزودن محصول"}

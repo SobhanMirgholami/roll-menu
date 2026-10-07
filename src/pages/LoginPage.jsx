@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import toast from 'react-hot-toast'
+import Loading from '../components/Loading'
 import CafeLogo from '../components/CafeLogo'
 
 export default function LoginPage() {
@@ -30,12 +32,15 @@ export default function LoginPage() {
 
       if (loginError) {
         setError('ورود انجام نشد؛ ایمیل و رمز را بررسی کن.')
+        toast.error('ورود انجام نشد؛ ایمیل و رمز را بررسی کنید.')
         return
       }
 
+      toast.success('خوش آمدید.')
       navigate('/admin', { replace: true })
     } catch {
       setError('ارتباط برقرار نشد؛ دوباره امتحان کن.')
+      toast.error('ارتباط برقرار نشد.')
     } finally {
       setLoading(false)
     }
@@ -101,7 +106,7 @@ export default function LoginPage() {
           disabled={loading}
           className="btn btn-primary"
         >
-          {loading ? 'در حال ورود...' : 'ورود'}
+          {loading ? <Loading inline label="در حال ورود..." /> : 'ورود'}
         </button>
 
         <Link to="/" className="login-back">

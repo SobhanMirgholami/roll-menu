@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Loading from "./Loading";
 import { Navigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 
@@ -44,7 +45,7 @@ export default function ProtectedRoute({ children }) {
   }, []);
 
   if (loading) {
-    return <p dir="rtl">در حال بررسی ورود...</p>;
+    return <Loading label="در حال بررسی ورود..." />;
   }
 
   if (!user) {
