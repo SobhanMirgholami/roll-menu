@@ -107,7 +107,10 @@ export default function App() {
       <div className="mx-auto max-w-3xl">
         <h1 className="mb-6 text-3xl font-bold text-stone-900">منوی کافه</h1>
 
-        <AddProductForm onAddProduct={handleAddProduct} />
+        <AddProductForm
+          onAddProduct={handleAddProduct}
+          categories={categories.filter((category) => category !== "همه")}
+        />
 
         <label className="mb-6 block">
           <span className="mb-2 block font-medium text-stone-700">
