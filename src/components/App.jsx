@@ -1,4 +1,5 @@
 import ProductCard from "./ProductCard";
+import CategoryTabs from "./CategoryTabs";
 import { useState } from "react";
 const products = [
   {
@@ -61,20 +62,11 @@ export default function App() {
         />
       </label>
       <div className="mb-6 flex flex-wrap gap-2">
-        {categories.map((category) => (
-          <button
-            key={category}
-            type="button"
-            onClick={() => setSelectedCategory(category)}
-            className={`rounded-full px-4 py-2 ${
-              selectedCategory === category
-                ? "bg-amber-700 text-white"
-                : "bg-white text-stone-700"
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+        <CategoryTabs
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {filteredProducts.map((product) => (
