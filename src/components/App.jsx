@@ -1,84 +1,111 @@
-import { useState } from 'react'
-import ProductCard from './ProductCard'
-import CategoryTabs from './CategoryTabs'
-import AddProductForm from './AddProductForm'
+import { useEffect, useState } from "react";
+import ProductCard from "./ProductCard";
+import CategoryTabs from "./CategoryTabs";
+import AddProductForm from "./AddProductForm";
 
 const initialProducts = [
   {
     id: 1,
-    name: 'لاته',
-    description: 'اسپرسو همراه با شیر',
+    name: "لاته",
+    description: "اسپرسو همراه با شیر",
     price: 120000,
-    category: 'قهوه گرم',
+    category: "قهوه گرم",
     isAvailable: true,
   },
   {
     id: 2,
-    name: 'اسپرسو',
-    description: 'یک شات قهوه',
+    name: "اسپرسو",
+    description: "یک شات قهوه",
     price: 80000,
-    category: 'قهوه گرم',
+    category: "قهوه گرم",
     isAvailable: true,
   },
   {
     id: 3,
-    name: 'کاپوچینو',
-    description: 'اسپرسو، شیر و فوم شیر',
+    name: "کاپوچینو",
+    description: "اسپرسو، شیر و فوم شیر",
     price: 110000,
-    category: 'قهوه گرم',
+    category: "قهوه گرم",
     isAvailable: true,
   },
   {
     id: 5,
-    name: 'لیموناد',
-    description: 'لیمو تازه همراه با یخ',
+    name: "لیموناد",
+    description: "لیمو تازه همراه با یخ",
     price: 90000,
-    category: 'نوشیدنی سرد',
+    category: "نوشیدنی سرد",
     isAvailable: false,
   },
   {
     id: 6,
-    name: 'چیزکیک',
-    description: 'چیزکیک با سس توت‌فرنگی',
+    name: "چیزکیک",
+    description: "چیزکیک با سس توت‌فرنگی",
     price: 150000,
-    category: 'دسر',
+    category: "دسر",
     isAvailable: true,
   },
-]
+];
+function loadProducts() {
+  try {
+    const savedProducts = localStorage.getItem("cafe-products");
+
+    if (savedProducts === null) {
+      return initialProducts;
+    }
+
+    const parsedProducts = JSON.parse(savedProducts);
+
+    return Array.isArray(parsedProducts) ? parsedProducts : initialProducts;
+  } catch {
+    return initialProducts;
+  }
+}
 
 export default function App() {
-  const [products, setProducts] = useState(initialProducts)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('همه')
+  const [products, setProducts] = useState(loadProducts);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("همه");
+  useEffect(() => {
+    try {
+      localStorage.setItem("cafe-products", JSON.stringify(products));
+    } catch (error) {
+      console.error("ذخیره‌سازی محصولات انجام نشد:", error);
+    }
+  }, [products]);
 
   const categories = [
-    'همه',
+    "همه",
     ...new Set(products.map((product) => product.category)),
-  ]
+  ];
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
-      selectedCategory === 'همه' ||
-      product.category === selectedCategory
+      selectedCategory === "همه" || product.category === selectedCategory;
 
-    const matchesSearch = product.name.includes(searchTerm.trim())
+    const matchesSearch = product.name.includes(searchTerm.trim());
 
-    return matchesCategory && matchesSearch
-  })
+    return matchesCategory && matchesSearch;
+  });
 
   function handleAddProduct(newProduct) {
-    setProducts((currentProducts) => [
-      ...currentProducts,
-      newProduct,
-    ])
+    setProducts((currentProducts) => [...currentProducts, newProduct]);
+  }
+  function handleDeleteProduct(productId) {
+    const confirmed = window.confirm("این محصول حذف شود؟");
+
+    if (!confirmed) {
+      return;
+    }
+
+    setProducts((currentProducts) =>
+      currentProducts.filter((product) => product.id !== productId),
+    );
   }
 
   return (
     <main dir="rtl" className="min-h-screen bg-stone-100 px-4 py-10">
       <div className="mx-auto max-w-3xl">
-        <h1 className="mb-6 text-3xl font-bold text-stone-900">
-          منوی کافه
-        </h1>
+        <h1 className="mb-6 text-3xl font-bold text-stone-900">منوی کافه</h1>
 
         <AddProductForm onAddProduct={handleAddProduct} />
 
@@ -110,16 +137,15 @@ export default function App() {
               description={product.description}
               price={product.price}
               isAvailable={product.isAvailable}
+              onDelete={() => handleDeleteProduct(product.id)}
             />
           ))}
         </div>
 
         {filteredProducts.length === 0 && (
-          <p className="mt-6 text-center text-stone-500">
-            محصولی پیدا نشد.
-          </p>
+          <p className="mt-6 text-center text-stone-500">محصولی پیدا نشد.</p>
         )}
       </div>
     </main>
-  )
+  );
 }
