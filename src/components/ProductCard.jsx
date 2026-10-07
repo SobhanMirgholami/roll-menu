@@ -18,7 +18,7 @@ export default function ProductCard({
           src={image}
           alt={name}
           loading="lazy"
-          className="mb-4 h-40 w-full rounded-xl object-cover"
+          className="mb-4 aspect-square w-full rounded-xl object-contain"
         />
       )}
       <div className="flex items-start justify-between gap-3">
