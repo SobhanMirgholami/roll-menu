@@ -607,3 +607,32 @@ textarea.input {
     height: 76px;
   }
 }
+
+.page,
+.login-page {
+  position: relative;
+  isolation: isolate;
+  background-color: #fff8ef;
+}
+
+.page::before,
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background-image: url("/coffee-pattern.png");
+  background-repeat: repeat;
+  background-position: center;
+  background-size: 680px;
+  opacity: 0.65;
+}
+
+@media (max-width: 480px) {
+  .page::before,
+  .login-page::before {
+    background-size: 480px;
+  }
+}
