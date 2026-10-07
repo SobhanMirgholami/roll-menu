@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import MenuPage from "../pages/MenuPage";
 import AdminPage from "../pages/AdminPage";
+import LoginPage from "../pages/LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
-import LoginPage from "../pages/LoginPage.jsx";
+
 const initialProducts = [
   {
     id: 1,
@@ -46,6 +48,7 @@ const initialProducts = [
     isAvailable: true,
   },
 ];
+
 function loadProducts() {
   try {
     const savedProducts = localStorage.getItem("cafe-products");
@@ -56,7 +59,9 @@ function loadProducts() {
 
     const parsedProducts = JSON.parse(savedProducts);
 
-    return Array.isArray(parsedProducts) ? parsedProducts : initialProducts;
+    return Array.isArray(parsedProducts)
+      ? parsedProducts
+      : initialProducts;
   } catch {
     return initialProducts;
   }
@@ -64,17 +69,35 @@ function loadProducts() {
 
 export default function App() {
   const [products, setProducts] = useState(loadProducts);
+
   useEffect(() => {
     try {
-      localStorage.setItem("cafe-products", JSON.stringify(products));
+      localStorage.setItem(
+        "cafe-products",
+        JSON.stringify(products)
+      );
     } catch (error) {
       console.error("ذخیره‌سازی محصولات انجام نشد:", error);
     }
   }, [products]);
 
   function handleAddProduct(newProduct) {
-    setProducts((currentProducts) => [...currentProducts, newProduct]);
+    setProducts((currentProducts) => [
+      ...currentProducts,
+      newProduct,
+    ]);
   }
+
+  function handleUpdateProduct(updatedProduct) {
+    setProducts((currentProducts) =>
+      currentProducts.map((product) =>
+        product.id === updatedProduct.id
+          ? updatedProduct
+          : product
+      )
+    );
+  }
+
   function handleDeleteProduct(productId) {
     const confirmed = window.confirm("این محصول حذف شود؟");
 
@@ -83,9 +106,12 @@ export default function App() {
     }
 
     setProducts((currentProducts) =>
-      currentProducts.filter((product) => product.id !== productId),
+      currentProducts.filter(
+        (product) => product.id !== productId
+      )
     );
   }
+
   function handleToggleAvailability(productId) {
     setProducts((currentProducts) =>
       currentProducts.map((product) =>
@@ -94,17 +120,23 @@ export default function App() {
               ...product,
               isAvailable: !product.isAvailable,
             }
-          : product,
-      ),
+          : product
+      )
     );
   }
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MenuPage products={products} />} />
+        <Route
+          path="/"
+          element={<MenuPage products={products} />}
+        />
 
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/login"
+          element={<LoginPage />}
+        />
 
         <Route
           path="/admin"
@@ -113,8 +145,11 @@ export default function App() {
               <AdminPage
                 products={products}
                 onAddProduct={handleAddProduct}
+                onUpdateProduct={handleUpdateProduct}
                 onDeleteProduct={handleDeleteProduct}
-                onToggleAvailability={handleToggleAvailability}
+                onToggleAvailability={
+                  handleToggleAvailability
+                }
               />
             </ProtectedRoute>
           }

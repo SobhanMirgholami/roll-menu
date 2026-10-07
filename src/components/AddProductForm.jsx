@@ -1,97 +1,139 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from "react";
 
 function normalizeCategory(value) {
   return value
     .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/ي/g, 'ی')
-    .replace(/ك/g, 'ک')
+    .replace(/\s+/g, " ")
+    .replace(/ي/g, "ی")
+    .replace(/ك/g, "ک");
 }
 
 export default function AddProductForm({
   onAddProduct,
+  onUpdateProduct,
+  onCancelEdit,
+  productToEdit = null,
   categories = [],
 }) {
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
-  const [category, setCategory] = useState('')
-  const [image, setImage] = useState('')
-  const [imageLoading, setImageLoading] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const isEditing = productToEdit !== null;
 
-  const fileInputRef = useRef(null)
+  const [name, setName] = useState(
+    productToEdit?.name ?? ""
+  );
+
+  const [description, setDescription] = useState(
+    productToEdit?.description ?? ""
+  );
+
+  const [price, setPrice] = useState(
+    String(productToEdit?.price ?? "")
+  );
+
+  const [category, setCategory] = useState(
+    productToEdit?.category ?? ""
+  );
+
+  const [image, setImage] = useState(
+    productToEdit?.image ?? ""
+  );
+
+  const [imageLoading, setImageLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const fileInputRef = useRef(null);
+  const readerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (readerRef.current?.readyState === 1) {
+        readerRef.current.abort();
+      }
+    };
+  }, []);
 
   function handleImageChange(event) {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
 
-    setImage('')
-    setError('')
+    setError("");
 
     if (!file) {
-      return
+      return;
     }
 
     const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-    ]
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
 
     if (!allowedTypes.includes(file.type)) {
-      setError('عکس باید JPG، PNG یا WebP باشد.')
-      event.target.value = ''
-      return
+      setError("عکس باید JPG، PNG یا WebP باشد.");
+      event.target.value = "";
+      return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      setError('حجم عکس باید حداکثر ۲ مگابایت باشد.')
-      event.target.value = ''
-      return
+      setError("حجم عکس باید حداکثر ۲ مگابایت باشد.");
+      event.target.value = "";
+      return;
     }
 
-    setImageLoading(true)
+    setImageLoading(true);
 
-    const reader = new FileReader()
+    const reader = new FileReader();
+    readerRef.current = reader;
 
     reader.onload = () => {
-      setImage(reader.result)
-      setImageLoading(false)
-    }
+      setImage(reader.result);
+      setImageLoading(false);
+    };
 
     reader.onerror = () => {
-      setError('خواندن عکس انجام نشد؛ دوباره انتخاب کن.')
-      setImageLoading(false)
+      setError("خواندن عکس انجام نشد؛ دوباره انتخاب کن.");
+      setImageLoading(false);
 
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+        fileInputRef.current.value = "";
       }
-    }
+    };
 
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(file);
+  }
+
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setPrice("");
+    setCategory("");
+    setImage("");
+    setError("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   async function handleSubmit(event) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (imageLoading || submitting) {
-      return
+      return;
     }
 
-    setError('')
-
-    if (!image) {
-      setError('انتخاب عکس محصول الزامی است.')
-      return
-    }
+    setError("");
 
     if (!name.trim() || !category.trim()) {
-      setError('نام محصول و دسته‌بندی را وارد کن.')
-      return
+      setError("نام محصول و دسته‌بندی را وارد کن.");
+      return;
     }
 
-    const numericPrice = Number(price)
+    if (!image) {
+      setError("انتخاب عکس محصول الزامی است.");
+      return;
+    }
+
+    const numericPrice = Number(price);
 
     if (
       !price.trim() ||
@@ -99,45 +141,50 @@ export default function AddProductForm({
       !Number.isInteger(numericPrice) ||
       numericPrice <= 0
     ) {
-      setError('قیمت باید یک عدد صحیح بزرگ‌تر از صفر باشد.')
-      return
+      setError(
+        "قیمت باید یک عدد صحیح بزرگ‌تر از صفر باشد."
+      );
+      return;
     }
 
-    const normalizedCategory = normalizeCategory(category)
+    const normalizedCategory = normalizeCategory(category);
 
     const existingCategory = categories.find(
-      (item) => normalizeCategory(item) === normalizedCategory
-    )
+      (item) =>
+        normalizeCategory(item) === normalizedCategory
+    );
 
-    const newProduct = {
-      id: crypto.randomUUID(),
+    const product = {
+      ...(productToEdit ?? {}),
+      id: isEditing
+        ? productToEdit.id
+        : crypto.randomUUID(),
       name: name.trim(),
       description: description.trim(),
       price: numericPrice,
       category: existingCategory ?? normalizedCategory,
-      isAvailable: true,
       image,
-    }
+    };
 
-    setSubmitting(true)
+    setSubmitting(true);
 
     try {
-      await onAddProduct(newProduct)
+      if (isEditing) {
+        await onUpdateProduct(product);
+      } else {
+        await onAddProduct({
+          ...product,
+          isAvailable: true,
+        });
 
-      setName('')
-      setDescription('')
-      setPrice('')
-      setCategory('')
-      setImage('')
-      setError('')
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+        resetForm();
       }
     } catch {
-      setError('افزودن محصول انجام نشد؛ دوباره امتحان کن.')
+      setError(
+        "ذخیره محصول انجام نشد؛ دوباره امتحان کن."
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -147,7 +194,7 @@ export default function AddProductForm({
       className="glass add-product-form"
     >
       <h2 className="section-title">
-        افزودن محصول
+        {isEditing ? "ویرایش محصول" : "افزودن محصول"}
       </h2>
 
       <label className="field">
@@ -157,7 +204,9 @@ export default function AddProductForm({
           required
           type="text"
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) =>
+            setName(event.target.value)
+          }
           placeholder="نام محصول را وارد کنید"
           className="input"
           disabled={submitting}
@@ -170,7 +219,9 @@ export default function AddProductForm({
         <textarea
           rows={3}
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) =>
+            setDescription(event.target.value)
+          }
           placeholder="توضیحات محصول را وارد کنید"
           className="input"
           disabled={submitting}
@@ -186,7 +237,9 @@ export default function AddProductForm({
           min="1"
           step="1"
           value={price}
-          onChange={(event) => setPrice(event.target.value)}
+          onChange={(event) =>
+            setPrice(event.target.value)
+          }
           placeholder="مثلاً 120000"
           className="input"
           disabled={submitting}
@@ -201,28 +254,31 @@ export default function AddProductForm({
           type="text"
           list="product-category-options"
           value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          placeholder="انتخاب دسته‌ی قبلی یا نوشتن دسته‌ی جدید"
+          onChange={(event) =>
+            setCategory(event.target.value)
+          }
+          placeholder="انتخاب دسته قبلی یا نوشتن دسته جدید"
           className="input"
           disabled={submitting}
         />
 
         <datalist id="product-category-options">
-          {categories.map((existingCategory) => (
-            <option
-              key={existingCategory}
-              value={existingCategory}
-            />
+          {categories.map((item) => (
+            <option key={item} value={item} />
           ))}
         </datalist>
       </label>
 
       <label className="field upload-box">
-        <span>عکس محصول *</span>
+        <span>
+          {isEditing
+            ? "تغییر عکس محصول"
+            : "عکس محصول *"}
+        </span>
 
         <input
-          required
           ref={fileInputRef}
+          required={!image}
           type="file"
           accept="image/jpeg,image/png,image/webp"
           disabled={imageLoading || submitting}
@@ -233,6 +289,12 @@ export default function AddProductForm({
         <small className="hint">
           JPG، PNG یا WebP — حداکثر ۲ مگابایت
         </small>
+
+        {isEditing && image && (
+          <small className="hint">
+            اگر عکس جدید انتخاب نکنی، عکس فعلی حفظ می‌شود.
+          </small>
+        )}
       </label>
 
       {imageLoading && (
@@ -261,11 +323,24 @@ export default function AddProductForm({
         className="btn btn-primary"
       >
         {imageLoading
-          ? 'در حال خواندن عکس...'
+          ? "در حال خواندن عکس..."
           : submitting
-            ? 'در حال افزودن...'
-            : 'افزودن محصول'}
+            ? "در حال ذخیره..."
+            : isEditing
+              ? "ذخیره تغییرات"
+              : "افزودن محصول"}
       </button>
+
+      {isEditing && (
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          disabled={imageLoading || submitting}
+          className="btn btn-outline"
+        >
+          انصراف از ویرایش
+        </button>
+      )}
     </form>
-  )
+  );
 }

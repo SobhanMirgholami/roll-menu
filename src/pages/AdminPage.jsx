@@ -1,43 +1,59 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabaseClient'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import CafeLogo from '../components/CafeLogo'
-import AddProductForm from '../components/AddProductForm'
-import ProductCard from '../components/ProductCard'
+import { supabase } from "../lib/supabaseClient";
+import CafeLogo from "../components/CafeLogo";
+import AddProductForm from "../components/AddProductForm";
+import ProductCard from "../components/ProductCard";
 
 export default function AdminPage({
   products,
   onAddProduct,
+  onUpdateProduct,
   onDeleteProduct,
   onToggleAvailability,
 }) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [logoutLoading, setLogoutLoading] = useState(false)
-  const [logoutError, setLogoutError] = useState('')
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   const categories = [
     ...new Set(products.map((product) => product.category)),
-  ]
+  ];
+
+  function handleEdit(product) {
+    setEditingProduct(product);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
+  async function handleSaveEdit(updatedProduct) {
+    await onUpdateProduct(updatedProduct);
+    setEditingProduct(null);
+  }
 
   async function handleLogout() {
-    setLogoutLoading(true)
-    setLogoutError('')
+    setLogoutLoading(true);
+    setLogoutError("");
 
     try {
-      const { error } = await supabase.auth.signOut()
+      const { error } = await supabase.auth.signOut();
 
       if (error) {
-        setLogoutError('خروج انجام نشد؛ دوباره امتحان کن.')
-        return
+        setLogoutError("خروج انجام نشد؛ دوباره امتحان کن.");
+        return;
       }
 
-      navigate('/login', { replace: true })
+      navigate("/login", { replace: true });
     } catch {
-      setLogoutError('ارتباط برقرار نشد؛ دوباره امتحان کن.')
+      setLogoutError("ارتباط برقرار نشد؛ دوباره امتحان کن.");
     } finally {
-      setLogoutLoading(false)
+      setLogoutLoading(false);
     }
   }
 
@@ -59,7 +75,9 @@ export default function AdminPage({
             disabled={logoutLoading}
             className="btn btn-outline"
           >
-            {logoutLoading ? 'در حال خروج...' : 'خروج از حساب'}
+            {logoutLoading
+              ? "در حال خروج..."
+              : "خروج از حساب"}
           </button>
         </header>
 
@@ -71,8 +89,12 @@ export default function AdminPage({
 
         <div className="admin-layout">
           <AddProductForm
+            key={editingProduct?.id ?? "add"}
             categories={categories}
+            productToEdit={editingProduct}
             onAddProduct={onAddProduct}
+            onUpdateProduct={handleSaveEdit}
+            onCancelEdit={() => setEditingProduct(null)}
           />
 
           <section
@@ -95,7 +117,10 @@ export default function AdminPage({
                   price={product.price}
                   isAvailable={product.isAvailable}
                   image={product.image}
-                  onDelete={() => onDeleteProduct(product.id)}
+                  onEdit={() => handleEdit(product)}
+                  onDelete={() =>
+                    onDeleteProduct(product.id)
+                  }
                   onToggleAvailability={() =>
                     onToggleAvailability(product.id)
                   }
@@ -112,5 +137,5 @@ export default function AdminPage({
         </div>
       </div>
     </main>
-  )
+  );
 }

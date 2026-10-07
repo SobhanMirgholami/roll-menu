@@ -6,18 +6,23 @@ export default function ProductCard({
   image,
   onDelete,
   onToggleAvailability,
+  onEdit,
 }) {
-  const isAdmin = Boolean(onDelete || onToggleAvailability)
+  const isAdmin = Boolean(
+    onDelete || onToggleAvailability || onEdit
+  );
 
   const availabilityBadge = (
     <span
       className={`badge ${
-        isAvailable ? 'badge-available' : 'badge-unavailable'
+        isAvailable
+          ? "badge-available"
+          : "badge-unavailable"
       }`}
     >
-      {isAvailable ? 'موجود' : 'ناموجود'}
+      {isAvailable ? "موجود" : "ناموجود"}
     </span>
-  )
+  );
 
   if (isAdmin) {
     return (
@@ -39,7 +44,7 @@ export default function ProductCard({
           </p>
 
           <p className="product-price">
-            {price.toLocaleString('fa-IR')} تومان
+            {price.toLocaleString("fa-IR")} تومان
           </p>
 
           <div className="inline-badge">
@@ -48,16 +53,31 @@ export default function ProductCard({
         </div>
 
         <div className="admin-actions">
+          {onEdit && (
+            <button
+              type="button"
+              className="btn btn-neutral"
+              onClick={onEdit}
+              aria-label={`ویرایش ${name}`}
+            >
+              ویرایش
+            </button>
+          )}
+
           {onToggleAvailability && (
             <button
               type="button"
               className="btn btn-neutral"
               onClick={onToggleAvailability}
               aria-label={`${
-                isAvailable ? 'ناموجود کردن' : 'موجود کردن'
+                isAvailable
+                  ? "ناموجود کردن"
+                  : "موجود کردن"
               } ${name}`}
             >
-              {isAvailable ? 'ناموجود کردن' : 'موجود کردن'}
+              {isAvailable
+                ? "ناموجود کردن"
+                : "موجود کردن"}
             </button>
           )}
 
@@ -73,7 +93,7 @@ export default function ProductCard({
           )}
         </div>
       </article>
-    )
+    );
   }
 
   return (
@@ -103,7 +123,7 @@ export default function ProductCard({
         </p>
 
         <p className="product-price">
-          {price.toLocaleString('fa-IR')} تومان
+          {price.toLocaleString("fa-IR")} تومان
         </p>
 
         {!image && !isAvailable && (
@@ -113,5 +133,5 @@ export default function ProductCard({
         )}
       </div>
     </article>
-  )
+  );
 }
