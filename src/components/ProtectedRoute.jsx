@@ -1,56 +1,122 @@
 import { useEffect, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import Loading from "./Loading";
-import { Navigate } from "react-router-dom";
+import CafeLogo from "./CafeLogo";
 import { supabase } from "../lib/supabaseClient";
+import { getAdminAccess } from "../lib/adminAccess";
 
 export default function ProtectedRoute({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("checking");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let active = true;
+    let requestId = 0;
+    let currentUserId = null;
+    let timer;
 
-    async function checkUser() {
+    async function checkAccess() {
+      const request = ++requestId;
+      setStatus("checking");
+
       try {
-        const { data, error } = await supabase.auth.getUser();
+        const result = await getAdminAccess();
 
-        if (active) {
-          setUser(error ? null : data.user);
+        if (active && request === requestId) {
+          currentUserId = result.userId;
+          setStatus(result.status);
         }
       } catch {
-        if (active) {
-          setUser(null);
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
+        if (active && request === requestId) {
+          setStatus("error");
         }
       }
     }
 
-    checkUser();
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active && !session) {
-        setUser(null);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+
+      if (event === "SIGNED_OUT") {
+        requestId += 1;
+        currentUserId = null;
+        clearTimeout(timer);
+        setStatus("signedOut");
+      } else if (
+        event === "SIGNED_IN" &&
+        session?.user?.id !== currentUserId
+      ) {
+        requestId += 1;
+        setStatus("checking");
+        clearTimeout(timer);
+        // بررسی دسترسی خارج از callback احراز هویت اجرا می‌شود.
+        timer = setTimeout(() => {
+          void checkAccess();
+        }, 0);
       }
     });
 
+    void checkAccess();
+
     return () => {
       active = false;
+      requestId += 1;
+      clearTimeout(timer);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [retryCount]);
 
-  if (loading) {
-    return <Loading label="در حال بررسی ورود..." />;
+  if (status === "checking") {
+    return <Loading label="در حال بررسی دسترسی..." />;
   }
 
-  if (!user) {
+  if (status === "signedOut") {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  if (status === "allowed") {
+    return children;
+  }
+
+  return (
+    <main dir="rtl" className="page login-page">
+      <section className="glass login-form">
+        <CafeLogo />
+
+        <h1 className="login-title">
+          {status === "error"
+            ? "بررسی دسترسی انجام نشد"
+            : "دسترسی به مدیریت ندارید"}
+        </h1>
+
+        <p role="alert" className="error">
+          {status === "error"
+            ? "ارتباط را بررسی کنید و دوباره تلاش کنید."
+            : "این حساب اجازهٔ مدیریت منو را ندارد."}
+        </p>
+
+        {status === "error" && (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              setStatus("checking");
+              setRetryCount((previous) => previous + 1);
+            }}
+          >
+            تلاش دوباره
+          </button>
+        )}
+
+        <Link to="/login" className="btn btn-outline">
+          ورود با حساب دیگر
+        </Link>
+
+        <Link to="/" className="login-back">
+          بازگشت به منو
+        </Link>
+      </section>
+    </main>
+  );
 }

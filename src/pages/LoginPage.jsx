@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { getAdminAccess } from '../lib/adminAccess'
 import toast from 'react-hot-toast'
 import Loading from '../components/Loading'
 import CafeLogo from '../components/CafeLogo'
@@ -36,11 +37,23 @@ export default function LoginPage() {
         return
       }
 
+      const access = await getAdminAccess()
+
+      if (access.status !== 'allowed') {
+        const message = access.status === 'denied'
+          ? 'این حساب اجازهٔ مدیریت منو را ندارد.'
+          : 'نشست ورود معتبر نیست؛ دوباره وارد شوید.'
+
+        setError(message)
+        toast.error(message)
+        return
+      }
+
       toast.success('خوش آمدید.')
       navigate('/admin', { replace: true })
     } catch {
-      setError('ارتباط برقرار نشد؛ دوباره امتحان کن.')
-      toast.error('ارتباط برقرار نشد.')
+      setError('ورود یا بررسی دسترسی انجام نشد؛ دوباره امتحان کن.')
+      toast.error('ورود یا بررسی دسترسی انجام نشد.')
     } finally {
       setLoading(false)
     }

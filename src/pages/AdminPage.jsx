@@ -40,10 +40,12 @@ export default function AdminPage({
     setEditingProduct(null);
   }
 
-  function handleDelete(id) {
-    try {
-      if (onDeleteProduct(id) && editingProduct?.id === id) setEditingProduct(null);
-    } catch { /* The parent reports save errors with a toast. */ }
+  async function handleDelete(id) {
+    const deleted = await onDeleteProduct(id);
+
+    if (deleted && editingProduct?.id === id) {
+      setEditingProduct(null);
+    }
   }
   function handleToggle(id) {
     try { onToggleAvailability(id); } catch { /* Save error reported by parent. */ }

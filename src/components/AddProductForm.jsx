@@ -168,10 +168,8 @@ export default function AddProductForm({
 
         resetForm();
       }
-    } catch {
-      setError(
-        "ذخیره محصول انجام نشد؛ دوباره امتحان کن."
-      );
+    } catch (err) {
+      setError(err?.message || "ذخیره محصول انجام نشد؛ دوباره امتحان کن.");
     } finally {
       setSubmitting(false);
     }
