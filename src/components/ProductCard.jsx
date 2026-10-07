@@ -32,6 +32,7 @@ export default function ProductCard({
             src={image}
             alt={name}
             loading="lazy"
+            decoding="async"
             className="admin-product-image"
           />
         )}
@@ -104,6 +105,7 @@ export default function ProductCard({
             src={image}
             alt={name}
             loading="lazy"
+            decoding="async"
             className="product-image"
           />
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { optimizeProductImage } from "../lib/optimizeProductImage";
 
 function normalizeCategory(value) {
   return value
@@ -42,17 +43,10 @@ export default function AddProductForm({
   const [error, setError] = useState("");
 
   const fileInputRef = useRef(null);
-  const readerRef = useRef(null);
+  const imageRequestRef = useRef(0);
+  useEffect(() => () => { imageRequestRef.current += 1; }, []);
 
-  useEffect(() => {
-    return () => {
-      if (readerRef.current?.readyState === 1) {
-        readerRef.current.abort();
-      }
-    };
-  }, []);
-
-  function handleImageChange(event) {
+  async function handleImageChange(event) {
     const file = event.target.files?.[0];
 
     setError("");
@@ -81,24 +75,18 @@ export default function AddProductForm({
 
     setImageLoading(true);
 
-    const reader = new FileReader();
-    readerRef.current = reader;
-
-    reader.onload = () => {
-      setImage(reader.result);
-      setImageLoading(false);
-    };
-
-    reader.onerror = () => {
-      setError("خواندن عکس انجام نشد؛ دوباره انتخاب کن.");
-      setImageLoading(false);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+    const request = ++imageRequestRef.current;
+    try {
+      const optimizedImage = await optimizeProductImage(file);
+      if (request === imageRequestRef.current) setImage(optimizedImage);
+    } catch {
+      if (request === imageRequestRef.current) {
+        setError("خواندن عکس انجام نشد؛ دوباره انتخاب کن.");
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
-    };
-
-    reader.readAsDataURL(file);
+    } finally {
+      if (request === imageRequestRef.current) setImageLoading(false);
+    }
   }
 
   function resetForm() {

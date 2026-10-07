@@ -21,17 +21,7 @@ body {
   min-width: 320px;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: url("/coffee-pattern.png");
-  background-size: 680px;
-  background-repeat: repeat;
-  opacity: 0.65;
-}
+
 
 button,
 input,
@@ -623,7 +613,7 @@ textarea.input {
   z-index: -1;
   pointer-events: none;
 
-  background-image: url("/coffee-pattern.png");
+  background-image: url("/coffee-pattern.webp");
   background-repeat: repeat;
   background-position: center;
   background-size: 680px;
@@ -634,5 +624,22 @@ textarea.input {
   .page::before,
   .login-page::before {
     background-size: 480px;
+  }
+}
+/* Keep translucent cards without expensive blur on each product. */
+.product-card,
+.admin-product {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+@media (max-width: 760px) {
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgb(255 255 255 / 82%);
+  }
+  .search-input, .category-tab {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }

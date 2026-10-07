@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import MenuPage from "../pages/MenuPage";
-import AdminPage from "../pages/AdminPage";
-import LoginPage from "../pages/LoginPage";
-import ProtectedRoute from "./ProtectedRoute";
+const AdminPage = lazy(() => import("../pages/AdminPage"));
+const LoginPage = lazy(() => import("../pages/LoginPage"));
+const ProtectedRoute = lazy(() => import("./ProtectedRoute"));
 
 const initialProducts = [
   {
@@ -70,7 +70,12 @@ function loadProducts() {
 export default function App() {
   const [products, setProducts] = useState(loadProducts);
 
+  const lastSavedProducts = useRef(products);
+
   useEffect(() => {
+    // Avoid rewriting all saved images on the initial menu visit.
+    if (lastSavedProducts.current === products) return;
+    lastSavedProducts.current = products;
     try {
       localStorage.setItem(
         "cafe-products",
@@ -127,6 +132,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <Suspense fallback={<p dir="rtl" role="status" className="empty">در حال بارگذاری...</p>}>
       <Routes>
         <Route
           path="/"
@@ -155,6 +161,7 @@ export default function App() {
           }
         />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

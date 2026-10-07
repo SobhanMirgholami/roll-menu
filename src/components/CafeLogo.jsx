@@ -2,9 +2,13 @@ export default function CafeLogo() {
   return (
     <div className="logo-frame">
       <img
-        src="/CAFE%20ROLL%20-%20General-01.jpg"
+        src="/cafe-logo.webp"
         alt="لوگوی کافه رول"
         className="logo-image"
+        width="400"
+        height="400"
+        fetchPriority="high"
+        decoding="async"
       />
     </div>
   )
