@@ -65,6 +65,7 @@ export default function AdminPage({
               description={product.description}
               price={product.price}
               isAvailable={product.isAvailable}
+              image={product.image}
               onDelete={() => onDeleteProduct(product.id)}
               onToggleAvailability={() => onToggleAvailability(product.id)}
             />

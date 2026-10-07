@@ -1,32 +1,29 @@
-import { useState } from 'react'
-import ProductCard from '../components/ProductCard'
-import CategoryTabs from '../components/CategoryTabs'
+import { useState } from "react";
+import ProductCard from "../components/ProductCard";
+import CategoryTabs from "../components/CategoryTabs";
 
 export default function MenuPage({ products }) {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('همه')
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("همه");
 
   const categories = [
-    'همه',
+    "همه",
     ...new Set(products.map((product) => product.category)),
-  ]
+  ];
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
-      selectedCategory === 'همه' ||
-      product.category === selectedCategory
+      selectedCategory === "همه" || product.category === selectedCategory;
 
-    const matchesSearch = product.name.includes(searchTerm.trim())
+    const matchesSearch = product.name.includes(searchTerm.trim());
 
-    return matchesCategory && matchesSearch
-  })
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <main dir="rtl" className="min-h-screen bg-stone-100 px-4 py-10">
       <div className="mx-auto max-w-3xl">
-        <h1 className="mb-6 text-3xl font-bold">
-          منوی کافه
-        </h1>
+        <h1 className="mb-6 text-3xl font-bold">منوی کافه</h1>
 
         <label className="mb-6 block">
           <span className="mb-2 block">جستجوی محصول</span>
@@ -54,16 +51,17 @@ export default function MenuPage({ products }) {
               description={product.description}
               price={product.price}
               isAvailable={product.isAvailable}
+              image={product.image}
+              onDelete={() => onDeleteProduct(product.id)}
+              onToggleAvailability={() => onToggleAvailability(product.id)}
             />
           ))}
         </div>
 
         {filteredProducts.length === 0 && (
-          <p className="mt-6 text-center">
-            محصولی پیدا نشد.
-          </p>
+          <p className="mt-6 text-center">محصولی پیدا نشد.</p>
         )}
       </div>
     </main>
-  )
+  );
 }

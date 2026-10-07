@@ -3,6 +3,7 @@ export default function ProductCard({
   description,
   price,
   isAvailable,
+  image,
   onDelete,
   onToggleAvailability,
 }) {
@@ -12,6 +13,14 @@ export default function ProductCard({
         isAvailable ? "bg-white" : "bg-stone-200"
       }`}
     >
+      {image && (
+        <img
+          src={image}
+          alt={name}
+          loading="lazy"
+          className="mb-4 h-40 w-full rounded-xl object-cover"
+        />
+      )}
       <div className="flex items-start justify-between gap-3">
         <h2 className="text-xl font-bold text-stone-900">{name}</h2>
 
