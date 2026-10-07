@@ -4,6 +4,7 @@ export default function ProductCard({
   price,
   isAvailable,
   onDelete,
+  onToggleAvailability,
 }) {
   return (
     <article
@@ -26,13 +27,30 @@ export default function ProductCard({
       <p className="mt-4 font-semibold text-amber-700">
         {price.toLocaleString("fa-IR")} تومان
       </p>
-      <button
-        type="button"
-        onClick={onDelete}
-        className="mt-4 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700"
-      >
-        حذف محصول
-      </button>
+
+      {(onDelete || onToggleAvailability) && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700"
+            >
+              حذف محصول
+            </button>
+          )}
+
+          {onToggleAvailability && (
+            <button
+              type="button"
+              onClick={onToggleAvailability}
+              className="rounded-lg bg-stone-700 px-3 py-2 text-sm text-white"
+            >
+              {isAvailable ? "ناموجود کردن" : "موجود کردن"}
+            </button>
+          )}
+        </div>
+      )}
     </article>
   );
 }

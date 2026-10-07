@@ -1,64 +1,64 @@
-import { useState } from "react";
+import { useState } from 'react'
 
 function normalizeCategory(value) {
   return value
     .trim()
-    .replace(/\s+/g, " ")
-    .replace(/ي/g, "ی")
-    .replace(/ك/g, "ک");
+    .replace(/\s+/g, ' ')
+    .replace(/ي/g, 'ی')
+    .replace(/ك/g, 'ک')
 }
 
-export default function AddProductForm({ onAddProduct, categories }) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("");
-  const [error, setError] = useState("");
-  const normalizedCategory = normalizeCategory(category);
-
-  const existingCategory = categories.find(
-    (item) => normalizeCategory(item) === normalizedCategory,
-  );
+export default function AddProductForm({
+  onAddProduct,
+  categories = [],
+}) {
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [price, setPrice] = useState('')
+  const [category, setCategory] = useState('')
+  const [error, setError] = useState('')
 
   function handleSubmit(event) {
-    event.preventDefault();
+    event.preventDefault()
 
-    const numericPrice = Number(price);
+    const numericPrice = Number(price)
 
     if (!name.trim() || !category.trim()) {
-      setError("نام محصول و دسته‌بندی را وارد کن.");
-      return;
+      setError('نام محصول و دسته‌بندی را وارد کن.')
+      return
     }
 
-    if (!price.trim() || !Number.isFinite(numericPrice) || numericPrice <= 0) {
-      setError("قیمت باید یک عدد بزرگ‌تر از صفر باشد.");
-      return;
+    if (
+      !price.trim() ||
+      !Number.isFinite(numericPrice) ||
+      numericPrice <= 0
+    ) {
+      setError('قیمت باید یک عدد بزرگ‌تر از صفر باشد.')
+      return
     }
 
-    const normalizedCategory = normalizeCategory(category);
+    const normalizedCategory = normalizeCategory(category)
 
     const existingCategory = categories.find(
-      (item) => normalizeCategory(item) === normalizedCategory,
-    );
+      (item) => normalizeCategory(item) === normalizedCategory
+    )
 
     const newProduct = {
       id: crypto.randomUUID(),
       name: name.trim(),
       description: description.trim(),
       price: numericPrice,
-
       category: existingCategory ?? normalizedCategory,
-
       isAvailable: true,
-    };
+    }
 
-    onAddProduct(newProduct);
+    onAddProduct(newProduct)
 
-    setName("");
-    setDescription("");
-    setPrice("");
-    setCategory("");
-    setError("");
+    setName('')
+    setDescription('')
+    setPrice('')
+    setCategory('')
+    setError('')
   }
 
   return (
@@ -66,7 +66,9 @@ export default function AddProductForm({ onAddProduct, categories }) {
       onSubmit={handleSubmit}
       className="mb-8 grid gap-4 rounded-2xl bg-white p-5"
     >
-      <h2 className="text-xl font-bold text-stone-900">افزودن محصول</h2>
+      <h2 className="text-xl font-bold text-stone-900">
+        افزودن محصول
+      </h2>
 
       <label>
         نام محصول
@@ -113,9 +115,13 @@ export default function AddProductForm({ onAddProduct, categories }) {
           placeholder="انتخاب دسته‌ی قبلی یا نوشتن دسته‌ی جدید"
           className="mt-1 w-full rounded-lg border border-stone-300 p-2"
         />
+
         <datalist id="product-category-options">
           {categories.map((existingCategory) => (
-            <option key={existingCategory} value={existingCategory} />
+            <option
+              key={existingCategory}
+              value={existingCategory}
+            />
           ))}
         </datalist>
       </label>
@@ -133,5 +139,5 @@ export default function AddProductForm({ onAddProduct, categories }) {
         افزودن محصول
       </button>
     </form>
-  );
+  )
 }
