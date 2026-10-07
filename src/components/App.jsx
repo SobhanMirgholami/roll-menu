@@ -30,13 +30,24 @@ const products = [
     price: 90000,
     category: "نوشیدنی سرد",
   },
+  {
+    id: 6,
+    name: "چیزکیک",
+    description: "چیزکیک با سس توت‌فرنگی",
+    price: 150000,
+    category: "دسر",
+    isAvailable: true,
+  },
 ];
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("همه");
 
-  const categories = ["همه", "قهوه گرم", "نوشیدنی سرد"];
+  const categories = [
+    "همه",
+    ...new Set(products.map((product) => product.category)),
+  ];
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
