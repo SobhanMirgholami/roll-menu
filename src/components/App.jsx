@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MenuPage from "../pages/MenuPage";
 import AdminPage from "../pages/AdminPage";
-
+import ProtectedRoute from "./ProtectedRoute";
+import LoginPage from "../pages/LoginPage.jsx";
 const initialProducts = [
   {
     id: 1,
@@ -103,15 +104,19 @@ export default function App() {
       <Routes>
         <Route path="/" element={<MenuPage products={products} />} />
 
+        <Route path="/login" element={<LoginPage />} />
+
         <Route
           path="/admin"
           element={
-            <AdminPage
-              products={products}
-              onAddProduct={handleAddProduct}
-              onDeleteProduct={handleDeleteProduct}
-              onToggleAvailability={handleToggleAvailability}
-            />
+            <ProtectedRoute>
+              <AdminPage
+                products={products}
+                onAddProduct={handleAddProduct}
+                onDeleteProduct={handleDeleteProduct}
+                onToggleAvailability={handleToggleAvailability}
+              />
+            </ProtectedRoute>
           }
         />
       </Routes>
