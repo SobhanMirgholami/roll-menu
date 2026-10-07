@@ -1,8 +1,10 @@
-import AddProductForm from "../components/AddProductForm";
-import ProductCard from "../components/ProductCard";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabaseClient";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
+
+import CafeLogo from '../components/CafeLogo'
+import AddProductForm from '../components/AddProductForm'
+import ProductCard from '../components/ProductCard'
 
 export default function AdminPage({
   products,
@@ -10,68 +12,105 @@ export default function AdminPage({
   onDeleteProduct,
   onToggleAvailability,
 }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [logoutLoading, setLogoutLoading] = useState(false);
-  const [logoutError, setLogoutError] = useState("");
+  const [logoutLoading, setLogoutLoading] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
+
+  const categories = [
+    ...new Set(products.map((product) => product.category)),
+  ]
 
   async function handleLogout() {
-    setLogoutLoading(true);
-    setLogoutError("");
+    setLogoutLoading(true)
+    setLogoutError('')
 
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut()
 
       if (error) {
-        setLogoutError("خروج انجام نشد؛ دوباره امتحان کن.");
-        return;
+        setLogoutError('خروج انجام نشد؛ دوباره امتحان کن.')
+        return
       }
 
-      navigate("/login", { replace: true });
+      navigate('/login', { replace: true })
     } catch {
-      setLogoutError("ارتباط برقرار نشد؛ دوباره امتحان کن.");
+      setLogoutError('ارتباط برقرار نشد؛ دوباره امتحان کن.')
     } finally {
-      setLogoutLoading(false);
+      setLogoutLoading(false)
     }
   }
-  const categories = [...new Set(products.map((product) => product.category))];
 
   return (
-    <main dir="rtl" className="min-h-screen bg-stone-100 px-4 py-10">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="mb-6 text-3xl font-bold">مدیریت منو</h1>
-        <button
-          type="button"
-          onClick={handleLogout}
-          disabled={logoutLoading}
-          className="mb-6 rounded-lg bg-stone-700 px-4 py-2 text-white disabled:opacity-50"
-        >
-          {logoutLoading ? "در حال خروج..." : "خروج از حساب"}
-        </button>
+    <main dir="rtl" className="page">
+      <div className="container">
+        <header className="admin-header">
+          <div className="admin-brand">
+            <CafeLogo />
+
+            <h1 className="admin-title">
+              مدیریت منوی کافه رول
+            </h1>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={logoutLoading}
+            className="btn btn-outline"
+          >
+            {logoutLoading ? 'در حال خروج...' : 'خروج از حساب'}
+          </button>
+        </header>
 
         {logoutError && (
-          <p role="alert" className="mb-4 text-red-700">
+          <p role="alert" className="error mb-5">
             {logoutError}
           </p>
         )}
 
-        <AddProductForm categories={categories} onAddProduct={onAddProduct} />
+        <div className="admin-layout">
+          <AddProductForm
+            categories={categories}
+            onAddProduct={onAddProduct}
+          />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              name={product.name}
-              description={product.description}
-              price={product.price}
-              isAvailable={product.isAvailable}
-              image={product.image}
-              onDelete={() => onDeleteProduct(product.id)}
-              onToggleAvailability={() => onToggleAvailability(product.id)}
-            />
-          ))}
+          <section
+            className="glass admin-products"
+            aria-labelledby="admin-products-title"
+          >
+            <h2
+              id="admin-products-title"
+              className="section-title"
+            >
+              محصولات منو
+            </h2>
+
+            <div className="admin-product-list">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  name={product.name}
+                  description={product.description}
+                  price={product.price}
+                  isAvailable={product.isAvailable}
+                  image={product.image}
+                  onDelete={() => onDeleteProduct(product.id)}
+                  onToggleAvailability={() =>
+                    onToggleAvailability(product.id)
+                  }
+                />
+              ))}
+            </div>
+
+            {products.length === 0 && (
+              <p className="empty">
+                هنوز محصولی اضافه نشده است.
+              </p>
+            )}
+          </section>
         </div>
       </div>
     </main>
-  );
+  )
 }

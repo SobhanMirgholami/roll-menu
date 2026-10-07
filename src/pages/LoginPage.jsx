@@ -1,73 +1,97 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabaseClient";
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
+import CafeLogo from '../components/CafeLogo'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   async function handleSubmit(event) {
-    event.preventDefault();
-    setError("");
-    setLoading(true);
+    event.preventDefault()
+
+    if (loading) {
+      return
+    }
+
+    setError('')
+    setLoading(true)
 
     try {
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+      const { error: loginError } =
+        await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        })
 
       if (loginError) {
-        setError("ورود انجام نشد؛ ایمیل و رمز را بررسی کن.");
-        return;
+        setError('ورود انجام نشد؛ ایمیل و رمز را بررسی کن.')
+        return
       }
 
-      navigate("/admin", { replace: true });
+      navigate('/admin', { replace: true })
     } catch {
-      setError("ارتباط برقرار نشد؛ دوباره امتحان کن.");
+      setError('ارتباط برقرار نشد؛ دوباره امتحان کن.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   return (
-    <main dir="rtl" className="min-h-screen bg-stone-100 px-4 py-10">
+    <main dir="rtl" className="page login-page">
       <form
         onSubmit={handleSubmit}
-        className="mx-auto grid max-w-md gap-4 rounded-2xl bg-white p-6"
+        className="glass login-form"
       >
-        <h1 className="text-2xl font-bold">ورود مدیر</h1>
+        <header className="login-heading">
+          <CafeLogo />
 
-        <label>
-          ایمیل
+          <h1 className="login-title">
+            ورود به مدیریت کافه رول
+          </h1>
+
+          <p className="login-description">
+            با حساب مدیر وارد شوید
+          </p>
+        </header>
+
+        <label className="field">
+          <span>ایمیل</span>
+
           <input
             required
             type="email"
+            dir="ltr"
             autoComplete="username"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mt-1 w-full rounded-lg border p-3"
+            placeholder="example@gmail.com"
+            className="input"
+            disabled={loading}
           />
         </label>
 
-        <label>
-          رمز عبور
+        <label className="field">
+          <span>رمز عبور</span>
+
           <input
             required
             type="password"
+            dir="ltr"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="mt-1 w-full rounded-lg border p-3"
+            className="input"
+            disabled={loading}
           />
         </label>
 
         {error && (
-          <p role="alert" className="text-red-700">
+          <p role="alert" className="error">
             {error}
           </p>
         )}
@@ -75,11 +99,15 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-amber-700 p-3 text-white disabled:opacity-50"
+          className="btn btn-primary"
         >
-          {loading ? "در حال ورود..." : "ورود"}
+          {loading ? 'در حال ورود...' : 'ورود'}
         </button>
+
+        <Link to="/" className="login-back">
+          بازگشت به منو
+        </Link>
       </form>
     </main>
-  );
+  )
 }

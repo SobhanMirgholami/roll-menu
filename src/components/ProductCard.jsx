@@ -7,59 +7,111 @@ export default function ProductCard({
   onDelete,
   onToggleAvailability,
 }) {
-  return (
-    <article
-      className={`rounded-2xl border border-stone-200 p-5 ${
-        isAvailable ? "bg-white" : "bg-stone-200"
+  const isAdmin = Boolean(onDelete || onToggleAvailability)
+
+  const availabilityBadge = (
+    <span
+      className={`badge ${
+        isAvailable ? 'badge-available' : 'badge-unavailable'
       }`}
     >
-      {image && (
-        <img
-          src={image}
-          alt={name}
-          loading="lazy"
-          className="mb-4 aspect-square w-full rounded-xl object-contain"
-        />
-      )}
-      <div className="flex items-start justify-between gap-3">
-        <h2 className="text-xl font-bold text-stone-900">{name}</h2>
+      {isAvailable ? 'موجود' : 'ناموجود'}
+    </span>
+  )
 
-        {!isAvailable && (
-          <span className="rounded-full bg-stone-700 px-3 py-1 text-xs text-white">
-            ناموجود
-          </span>
+  if (isAdmin) {
+    return (
+      <article className="glass admin-product">
+        {image && (
+          <img
+            src={image}
+            alt={name}
+            loading="lazy"
+            className="admin-product-image"
+          />
         )}
-      </div>
 
-      <p className="mt-2 text-sm text-stone-500">{description}</p>
+        <div className="admin-product-info">
+          <h3 className="product-name">{name}</h3>
 
-      <p className="mt-4 font-semibold text-amber-700">
-        {price.toLocaleString("fa-IR")} تومان
-      </p>
+          <p className="product-description">
+            {description}
+          </p>
 
-      {(onDelete || onToggleAvailability) && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {onDelete && (
-            <button
-              type="button"
-              onClick={onDelete}
-              className="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700"
-            >
-              حذف محصول
-            </button>
-          )}
+          <p className="product-price">
+            {price.toLocaleString('fa-IR')} تومان
+          </p>
 
+          <div className="inline-badge">
+            {availabilityBadge}
+          </div>
+        </div>
+
+        <div className="admin-actions">
           {onToggleAvailability && (
             <button
               type="button"
+              className="btn btn-neutral"
               onClick={onToggleAvailability}
-              className="rounded-lg bg-stone-700 px-3 py-2 text-sm text-white"
+              aria-label={`${
+                isAvailable ? 'ناموجود کردن' : 'موجود کردن'
+              } ${name}`}
             >
-              {isAvailable ? "ناموجود کردن" : "موجود کردن"}
+              {isAvailable ? 'ناموجود کردن' : 'موجود کردن'}
+            </button>
+          )}
+
+          {onDelete && (
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={onDelete}
+              aria-label={`حذف ${name}`}
+            >
+              حذف
             </button>
           )}
         </div>
+      </article>
+    )
+  }
+
+  return (
+    <article className="glass product-card">
+      {image && (
+        <div className="product-media">
+          <img
+            src={image}
+            alt={name}
+            loading="lazy"
+            className="product-image"
+          />
+
+          {!isAvailable && (
+            <span className="badge badge-unavailable media-badge">
+              ناموجود
+            </span>
+          )}
+        </div>
       )}
+
+      <div className="product-content">
+        <h2 className="product-name">{name}</h2>
+
+        <p className="product-description">
+          {description}
+        </p>
+
+        <p className="product-price">
+          {price.toLocaleString('fa-IR')} تومان
+        </p>
+
+        {!image && !isAvailable && (
+          <div className="inline-badge">
+            {availabilityBadge}
+          </div>
+        )}
+      </div>
     </article>
-  );
+  )
 }
