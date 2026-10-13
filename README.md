@@ -357,4 +357,12 @@ The repository currently has no automated test script. `npm run lint` and `npm r
 
 Cafe Roll branding is supplied for this cafe. The background and sample product assets are bundled locally. Actual uploaded product images take priority over name-based sample fallbacks.
 
-Keep the bundled Vazirmatn font license with the font assets. Review ownership and usage rights for branding and photos before reusing this project for another business. A repository-wide license has not been specified in the current project files.
+Keep the bundled Vazirmatn font license with the font assets. Review ownership and usage rights for branding and photos before reusing this project for another business.
+
+## 📜 License
+
+This project has its own license. **Please read [LICENSE.md](LICENSE.md) before using the code.**
+
+- ✅ You can copy, change and use the code **if you credit me** or **get my permission**
+- 🚫 You can't claim it as your own work
+- ☕ The Cafe Roll name, logo and photos belong to the café

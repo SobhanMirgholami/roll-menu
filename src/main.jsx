@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './theme.css'
 import App from './components/App.jsx'
+import { stampBuild } from './lib/buildInfo'
+
+stampBuild()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
